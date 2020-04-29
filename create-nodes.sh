@@ -24,7 +24,7 @@ for N in $(seq $MASTER_COUNT); do
   cat <<EOF
 - address: $(jq -r '.[].ipv4[0]' < master-$N.$CLUSTER_NAME.k.json)
   port: "22"
-  internal_address: $(jq -r '.[].ipv4[1]' < master-$N.$CLUSTER_NAME.k.json)
+  internal_address: ""
   role:
   - controlplane
   - worker
@@ -49,7 +49,7 @@ for N in $(seq $WORKER_COUNT); do
   cat <<EOF
 - address: $(jq -r '.[].ipv4[0]' < worker-$N.$CLUSTER_NAME.k.json)
   port: "22"
-  internal_address: $(jq -r '.[].ipv4[1]' < worker-$N.$CLUSTER_NAME.k.json)
+  internal_address: ""
   role:
   - worker
   - etcd

@@ -2,11 +2,13 @@
 
 set -e
 
-MASTER_COUNT=2
+MASTER_COUNT=3
 MASTER_NODE_TYPE=g6-standard-1
+MASTER_NODE_OS=linode/ubuntu19.10
 
 WORKER_COUNT=3
 WORKER_NODE_TYPE=g6-standard-2
+WORKER_NODE_OS=linode/ubuntu19.10
 
 CLUSTER_NAME=dev-minecraft
 ENVIRONMENT=dev
@@ -17,7 +19,7 @@ lc() {
 }
 
 for N in $(seq $MASTER_COUNT); do
-  while ! lc --label master-$N.$CLUSTER_NAME.k --tags k8s --tags k8s-master --tags cluster:$CLUSTER_NAME --tags env:$ENVIRONMENT --type $MASTER_NODE_TYPE > master-$N.$CLUSTER_NAME.k.json; do
+  while ! lc --image $MASTER_NODE_OS --label master-$N.$CLUSTER_NAME.k --tags k8s --tags k8s-master --tags cluster:$CLUSTER_NAME --tags env:$ENVIRONMENT --type $MASTER_NODE_TYPE > master-$N.$CLUSTER_NAME.k.json; do
     echo retrying...
     sleep 1
   done
@@ -27,7 +29,6 @@ for N in $(seq $MASTER_COUNT); do
   internal_address: ""
   role:
   - controlplane
-  - worker
   - etcd
   hostname_override: master-$N
   user: root
@@ -42,7 +43,7 @@ EOF
 done
 
 for N in $(seq $WORKER_COUNT); do
-  while ! lc --label worker-$N.$CLUSTER_NAME.k --tags k8s --tags k8s-worker --tags cluster:$CLUSTER_NAME --tags env:$ENVIRONMENT --type $WORKER_NODE_TYPE > worker-$N.$CLUSTER_NAME.k.json; do
+  while ! lc --image $WORKER_NODE_OS --label worker-$N.$CLUSTER_NAME.k --tags k8s --tags k8s-worker --tags cluster:$CLUSTER_NAME --tags env:$ENVIRONMENT --type $WORKER_NODE_TYPE > worker-$N.$CLUSTER_NAME.k.json; do
     echo retrying...
     sleep 1
   done
@@ -52,7 +53,6 @@ for N in $(seq $WORKER_COUNT); do
   internal_address: ""
   role:
   - worker
-  - etcd
   hostname_override: worker-$N
   user: root
   docker_socket: /var/run/docker.sock
